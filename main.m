@@ -108,76 +108,6 @@ figure
 plot(1:maxIter,bestobj/nUsers,'k','DisplayName','Average Sum Rate') %plot convergence
 hold on
 
-%% Proportional Fariness
-
-x_prev = rand(nAPs*nUsers,1); %previous x
-t_now=1; %current value of t
-t_prev=1; %previous value of t
-z=x_prev; % previous projected extrapolated point
-x_now=x_prev; %current x
-bestobj = zeros(maxIter,1);
-for nIter=1:maxIter
-    y = x_now+(t_prev/t_now)*(z-x_now)+((t_prev-1)/t_now)*(x_now-x_prev); %extrapolated point
-    Dy = gradFairnessRate(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,y); %gradient at y
-    y_next= y+alphay*Dy; %new y
-
-    Dx = gradFairnessRate(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,x_now); %gradient at x
-    x_next = x_now+alphax*Dx; %new x
-    
-    z = proj_Euclidean_ball_posorthant(y_next,nTx,nUsers,nAPs); %find z
-    v = proj_Euclidean_ball_posorthant(x_next,nTx,nUsers,nAPs); %find v
-    
-    Fz = propFairnessRate(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,z); %calculate objective at z
-    Fv = propFairnessRate(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,v); %calcualte objective at v
-
-    x_prev = x_now; %assing current x to previous x
-    if(Fz>Fv)
-        x_now = z; %if objective at z is higher then z is the next x
-    else
-        x_now = v; %if objective at v is higher then v is the next x
-    end
-    
-    bestobj(nIter)=max(Fz,Fv); %the objective is set to the maximum objective among the two
-    t_prev = t_now; %set current t to previous t
-    t_now = (sqrt(4*t_now^2)+1)/2; %find current t for next iteration
-end
-SE_FOM(2)= bestobj(end); %find value of proportional fariness rate
-plot(1:maxIter,bestobj,'r','DisplayName','Fairness Rate') %plot convergence
-%% Harmonic Rate Maximization
-
-t_now=1; %current value of t
-t_prev=1; %previous value of t
-z=x_prev; % previous projected extrapolated point
-x_now=x_prev; %current x
-bestobj = zeros(maxIter,1);
-for nIter=1:maxIter
-    y = x_now+(t_prev/t_now)*(z-x_now)+((t_prev-1)/t_now)*(x_now-x_prev); %extrapolated point 
-    Dy = gradHarmonicRate_v2(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,y); %gradient at y
-    y_next= y+alphay*Dy; %new y
-
-    Dx = gradHarmonicRate_v2(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,x_now); %gradient at x
-    x_next = x_now+alphax*Dx; %new x
-    
-    z = proj_Euclidean_ball_posorthant(y_next,nTx,nUsers,nAPs); %find z
-    v = proj_Euclidean_ball_posorthant(x_next,nTx,nUsers,nAPs); %find v
-    
-    Fz = harmonicSumRate_v2(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,z); %objective at z   
-    Fv = harmonicSumRate_v2(nAPs,nTx,nUsers,myNu,myBeta,myPsi,zeta_d,Tc,Tp,v); %objective at v
-
-    x_prev = x_now; %assing current x to previous x
-    if(Fz>Fv)
-        x_now = z; %if objective at z is higher then z is the next x
-    else
-        x_now = v; %if objective at v is higher then v is the next x
-    end
-    
-    bestobj(nIter)=max(Fz,Fv); %the objective is set to the maximum objective among the two
-    t_prev = t_now; %set current t to previous t
-    t_now = (sqrt(4*t_now^2)+1)/2; %find current t for next iteration
-end
-SE_FOM(3)= bestobj(end); %final value of harmonic rate
-plot(1:maxIter,bestobj,'b','DisplayName','Harmonic Rate') %plot convergence
-
 %% Min Rate Maximization
 
 t_now=1; %current value of t
@@ -210,7 +140,7 @@ for nIter=1:maxIter
     t_prev = t_now; %set current t to previous t
     t_now = (sqrt(4*t_now^2)+1)/2; %find current t for next iteration
 end
-SE_FOM(4)= bestobj(end); %final value of minimum rate
+SE_FOM(2)= bestobj(end); %final value of minimum rate
 plot(1:maxIter,bestobj,'g','DisplayName','Minimum Rate') %plot convergence
 
 %%
